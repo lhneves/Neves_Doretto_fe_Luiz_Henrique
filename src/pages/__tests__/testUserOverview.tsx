@@ -18,8 +18,7 @@ describe('UserOverview', () => {
     it('should render UserOverview', () => {
         render(<UserOverview />);
 
-        expect(screen.getByText('Test User')).toBeInTheDocument();
-        expect(screen.getByText('userName')).toBeInTheDocument();
-        expect(screen.getByText('location')).toBeInTheDocument();
+        expect(screen.getByText('Test User (userName)')).toBeInTheDocument();
+        expect(screen.getByText('📍location')).toBeInTheDocument();
     });
 });

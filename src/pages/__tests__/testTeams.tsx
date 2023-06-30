@@ -1,54 +1,99 @@
-import * as React from 'react';
-import {fireEvent, render, screen, waitFor, act} from '@testing-library/react';
-import * as API from '../../api';
+import React from 'react';
+import {
+    fireEvent,
+    render,
+    screen,
+    waitFor,
+    waitForElementToBeRemoved,
+} from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import {SWRConfig} from 'swr';
 import Teams from '../Teams';
+import * as API from '../../api';
+
+const mockUseNavigate = jest.fn();
 
 jest.mock('react-router-dom', () => ({
-    useLocation: () => ({
-        state: {
-            firstName: 'Test',
-            lastName: 'User',
-            displayName: 'userName',
-            location: 'location',
-        },
-    }),
-    useNavigate: () => ({}),
+    ...jest.requireActual('react-router-dom'),
+    useNavigate: () => mockUseNavigate,
 }));
 
 describe('Teams', () => {
-    beforeAll(() => {
-        jest.useFakeTimers();
-    });
+    const asyncGetData = jest.spyOn(API, 'getData');
+    const renderTeams = () => {
+        render(
+            <SWRConfig value={{provider: () => new Map()}}>
+                <Teams />
+            </SWRConfig>
+        );
+    };
 
-    afterEach(() => {
-        jest.clearAllTimers();
-    });
-
-    afterAll(() => {
-        jest.useRealTimers();
-    });
-
-    it('should render spinner while loading', async () => {
-        // TODO - Add code for this test
-    });
-
-    it('should render teams list', async () => {
-        jest.spyOn(API, 'getTeams').mockResolvedValue([
+    beforeEach(() => {
+        asyncGetData.mockResolvedValue([
             {
-                id: '1',
+                id: 'test-id-1',
                 name: 'Team1',
             },
             {
-                id: '2',
+                id: 'test-id-2',
                 name: 'Team2',
             },
         ]);
+    });
 
-        render(<Teams />);
+    it('should render header and spinner while loading', async () => {
+        renderTeams();
+
+        expect(screen.getByText('Teams')).toBeInTheDocument();
+        expect(screen.getByTestId('spinner')).toBeInTheDocument();
+
+        await waitForElementToBeRemoved(() => screen.queryByTestId('spinner'));
+    });
+
+    it('should render teams list and search filter', async () => {
+        renderTeams();
+
+        expect(screen.getByTestId('spinner')).toBeInTheDocument();
+
+        expect(asyncGetData).toHaveBeenCalledWith('teams');
 
         await waitFor(() => {
             expect(screen.getByText('Team1')).toBeInTheDocument();
         });
         expect(screen.getByText('Team2')).toBeInTheDocument();
+
+        expect(screen.getByTestId('search-icon')).toBeInTheDocument();
+    });
+
+    it('should filter results of teams when name is searched', async () => {
+        renderTeams();
+
+        await waitFor(() => {
+            expect(screen.getByTestId('search-icon')).toBeInTheDocument();
+        });
+
+        fireEvent.click(screen.getByTestId('search-icon'));
+        const input = screen.getByTestId('search');
+
+        await userEvent.type(input, 'Team1');
+
+        await waitFor(() => {
+            expect(screen.getByText('Team1')).toBeInTheDocument();
+        });
+        expect(screen.queryByText('Team2')).not.toBeInTheDocument();
+    });
+
+    it('should navigate to team overview page', async () => {
+        const navProps = {id: 'test-id-1', name: 'Team1'};
+
+        renderTeams();
+
+        await waitFor(() => {
+            expect(screen.getByText('Team1')).toBeInTheDocument();
+        });
+
+        fireEvent.click(screen.getByTestId('cardContainer-test-id-1'));
+
+        expect(mockUseNavigate).toHaveBeenCalledWith('/team/test-id-1', {state: navProps});
     });
 });
