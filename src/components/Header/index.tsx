@@ -1,13 +1,15 @@
 import React from 'react';
 import {useNavigate} from 'react-router-dom';
-import {HeaderContainer, BackButton, Title} from './styles';
+import TextInput, {TextInputProps} from 'components/TextInput';
+import {HeaderContainer, BackButton, Title, InputContainer} from './styles';
 
 interface HeaderProps {
     title: string;
     showBackButton?: boolean;
+    searchInput?: TextInputProps;
 }
 
-const Header = ({title, showBackButton = true}: HeaderProps) => {
+const Header = ({title, showBackButton = true, searchInput}: HeaderProps) => {
     const navigate = useNavigate();
     return (
         <HeaderContainer>
@@ -21,6 +23,11 @@ const Header = ({title, showBackButton = true}: HeaderProps) => {
                 </BackButton>
             )}
             <Title>{title}</Title>
+            {searchInput && (
+                <InputContainer>
+                    <TextInput value={searchInput.value} onChange={searchInput.onChange} />
+                </InputContainer>
+            )}
         </HeaderContainer>
     );
 };
