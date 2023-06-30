@@ -1,17 +1,17 @@
-import React, {useEffect, useState} from 'react';
-import {Team} from 'types';
+import React from 'react';
+import {ITeam} from 'types';
 
-import {getTeams} from '../api';
+import useSWR from 'swr';
+import {getData} from '../api';
 
 import Header from '../components/Header';
 import List from '../components/List';
 import {Container} from '../components/GlobalComponents';
 
 const Teams = () => {
-    const [teams, setTeams] = useState<Team[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const {data: teams, isLoading} = useSWR<ITeam[]>('teams', getData);
 
-    const formatTeamsToCards = (teamList: Team[]) => {
+    const formatTeamsToCards = (teamList: ITeam[]) => {
         if (teamList === undefined) {
             return [];
         }
@@ -26,15 +26,6 @@ const Teams = () => {
             };
         });
     };
-
-    useEffect(() => {
-        const fetchTeams = async () => {
-            const response = await getTeams();
-            setTeams(response);
-            setIsLoading(false);
-        };
-        fetchTeams();
-    }, []);
 
     return (
         <Container>
