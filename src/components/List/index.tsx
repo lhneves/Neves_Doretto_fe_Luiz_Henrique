@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {CardItem} from 'types';
+import {ICardItem} from 'types';
 
 import Card from '../Card';
 import {Spinner} from '../Spinner';
@@ -8,7 +8,7 @@ import {Spinner} from '../Spinner';
 import {Container} from './styles';
 
 interface ListProps {
-    items: CardItem[];
+    items: ICardItem[];
     isLoading: boolean;
 }
 

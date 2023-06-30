@@ -1,15 +1,15 @@
-export interface Team {
+export interface ITeam {
     id: string;
     name: string;
 }
 
-export interface TeamOverview {
+export interface ITeamOverview {
     id: string;
     teamLeadId: string;
     teamMemberIds: string[];
 }
 
-export interface UserData {
+export interface IUserData {
     id: string;
     firstName: string;
     lastName: string;
@@ -18,11 +18,11 @@ export interface UserData {
     avatar: string;
 }
 
-export interface CardItem {
+export interface ICardItem {
     id: string;
     title: string;
     name: string;
     location?: string;
     navigateTo?: string;
-    navigationProps?: UserData | Team;
+    navigationProps?: IUserData | ITeam;
 }
