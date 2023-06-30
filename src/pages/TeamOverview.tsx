@@ -1,8 +1,9 @@
 import React, {useEffect, useState} from 'react';
 import {useLocation, useParams} from 'react-router-dom';
-import {UserData} from 'types';
+import {ITeamOverview, IUserData} from 'types';
 
-import {getTeamOverview, getUserData} from '../api';
+import useSWR from 'swr';
+import {getData, getUserData} from '../api';
 
 import Card from '../components/Card';
 import {Container} from '../components/GlobalComponents';
@@ -13,11 +14,22 @@ const TeamOverview = () => {
     const location = useLocation();
     const {teamId} = useParams();
 
-    const [teamLead, setTeamLead] = useState<UserData>();
-    const [teamMembers, setTeamMembers] = useState<UserData[]>();
-    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const formatMembersToCards = (membersList: UserData[]) => {
+    const {data: teamOverview} = useSWR<ITeamOverview>(`teams/${teamId}`, getData);
+    const {data: teamLead} = useSWR<IUserData>(() => `users/${teamOverview.teamLeadId}`, getData);
+    const {data: teamMembers} = useSWR(
+        () => teamOverview.teamMemberIds,
+        async ids => Promise.all(ids.map(id => getUserData(id)))
+    );
+
+    useEffect(() => {
+        if (teamMembers && teamMembers.length > 0) {
+            setIsLoading(false);
+        }
+    }, [teamMembers]);
+
+    const formatMembersToCards = (membersList: IUserData[]) => {
         if (membersList.length === 0) {
             return [];
         }
@@ -51,22 +63,6 @@ const TeamOverview = () => {
             />
         );
     };
-
-    useEffect(() => {
-        var getTeamUsers = async () => {
-            const {teamLeadId, teamMemberIds = []} = await getTeamOverview(teamId);
-            const teamLeadData = await getUserData(teamLeadId);
-
-            const teamMembersData = await Promise.all(
-                teamMemberIds.map(teamMemberId => getUserData(teamMemberId))
-            );
-
-            setTeamLead(teamLeadData);
-            setTeamMembers(teamMembersData);
-            setIsLoading(false);
-        };
-        getTeamUsers();
-    }, [teamId]);
 
     return (
         <Container>

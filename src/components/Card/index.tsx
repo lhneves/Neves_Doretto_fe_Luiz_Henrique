@@ -1,9 +1,9 @@
 import React from 'react';
 import {useNavigate} from 'react-router-dom';
-import {CardItem} from 'types';
+import {ICardItem} from 'types';
 import {Container, InfoText, Title} from './styles';
 
-const Card = ({id, title, name, location, navigateTo, navigationProps}: CardItem) => {
+const Card = ({id, title, name, location, navigateTo, navigationProps}: ICardItem) => {
     const navigate = useNavigate();
 
     const onCardClick = e => {
