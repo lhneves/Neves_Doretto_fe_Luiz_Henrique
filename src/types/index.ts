@@ -1,4 +1,4 @@
-export interface Teams {
+export interface Team {
     id: string;
     name: string;
 }
@@ -18,14 +18,11 @@ export interface UserData {
     avatar: string;
 }
 
-export interface ListItemColumn {
-    key: string;
-    value: string;
-}
-
-export interface ListItem {
+export interface CardItem {
     id: string;
-    url?: string;
-    columns: Array<ListItemColumn>;
-    navigationProps?: UserData | Teams;
+    title: string;
+    name: string;
+    location?: string;
+    navigateTo?: string;
+    navigationProps?: UserData | Team;
 }
