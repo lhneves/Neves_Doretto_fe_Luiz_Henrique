@@ -48,6 +48,8 @@ npm install
 npm start
 ```
 
+If you're having trouble with the request, try removing the last slash from the `.env` file. That might fix the issue.
+
 #### The project will open in your browser with the following url http://localhost:3000;
 
 ## To run the tests yo must run
