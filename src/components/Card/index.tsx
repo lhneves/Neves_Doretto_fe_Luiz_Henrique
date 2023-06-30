@@ -1,46 +1,27 @@
-import * as React from 'react';
+import React from 'react';
 import {useNavigate} from 'react-router-dom';
-import {Teams, UserData} from 'types';
-import {Container} from './styles';
+import {CardItem} from 'types';
+import {Container, InfoText, Title} from './styles';
 
-interface Props {
-    id?: string;
-    url?: string;
-    columns: Array<{
-        key: string;
-        value: string;
-    }>;
-    hasNavigation?: boolean;
-    navigationProps?: UserData | Teams;
-}
-
-const Card = ({
-    id,
-    columns,
-    url,
-    hasNavigation = true,
-    navigationProps = null,
-}: Props): JSX.Element => {
+const Card = ({id, title, name, location, navigateTo, navigationProps}: CardItem) => {
     const navigate = useNavigate();
+
+    const onCardClick = e => {
+        e.preventDefault();
+        if (navigateTo) {
+            navigate(navigateTo, {state: navigationProps});
+        }
+    };
 
     return (
         <Container
             data-testid={`cardContainer-${id}`}
-            hasNavigation={hasNavigation}
-            onClick={(e: Event) => {
-                if (hasNavigation) {
-                    navigate(url, {
-                        state: navigationProps,
-                    });
-                }
-                e.preventDefault();
-            }}
+            onClick={onCardClick}
+            navigateTo={!!navigateTo}
         >
-            {columns.map(({key: columnKey, value}) => (
-                <p key={columnKey}>
-                    <strong>{columnKey}</strong>&nbsp;{value}
-                </p>
-            ))}
+            <Title data-testid="cardTitle">{title}</Title>
+            <InfoText data-testid="cardName">{name}</InfoText>
+            {location ? <InfoText data-testid="cardLocation">📍{location}</InfoText> : null}
         </Container>
     );
 };
