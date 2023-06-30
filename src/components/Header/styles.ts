@@ -38,3 +38,8 @@ export const BackButton = styled.button`
         outline: 0;
     }
 `;
+
+export const InputContainer = styled.div`
+    right: 40px;
+    position: absolute;
+`;

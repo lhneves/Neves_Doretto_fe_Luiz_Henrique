@@ -16,6 +16,9 @@ const TeamOverview = () => {
 
     const [isLoading, setIsLoading] = useState(true);
 
+    const [searchTeam, setSearchTeam] = useState('');
+    const [usersFiltered, setUsersFiltered] = useState<IUserData[]>();
+
     const {data: teamOverview} = useSWR<ITeamOverview>(`teams/${teamId}`, getData);
     const {data: teamLead} = useSWR<IUserData>(() => `users/${teamOverview.teamLeadId}`, getData);
     const {data: teamMembers} = useSWR(
@@ -64,11 +67,35 @@ const TeamOverview = () => {
         );
     };
 
+    const handleUserSearch = (userName: string) => {
+        setSearchTeam(userName);
+        if (userName === '') {
+            setUsersFiltered(undefined);
+            return;
+        }
+
+        const allUsers = [teamLead, ...teamMembers];
+
+        const usersFilter = allUsers.filter(user => {
+            const name = `${user.firstName} ${user.lastName}`;
+
+            return name.toLowerCase().includes(userName.toLowerCase());
+        });
+
+        setUsersFiltered(usersFilter);
+    };
+
     return (
         <Container>
-            <Header title={`Team ${location.state.name}`} />
-            {!isLoading && teamLead && teamLeadCard()}
-            <List items={formatMembersToCards(teamMembers ?? [])} isLoading={isLoading} />
+            <Header
+                title={`Team ${location.state.name}`}
+                searchInput={teamMembers && {value: searchTeam, onChange: handleUserSearch}}
+            />
+            {!isLoading && !usersFiltered && teamLead && teamLeadCard()}
+            <List
+                items={formatMembersToCards(usersFiltered ?? teamMembers ?? [])}
+                isLoading={isLoading}
+            />
         </Container>
     );
 };
