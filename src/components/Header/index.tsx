@@ -1,28 +1,33 @@
-import * as React from 'react';
+import React from 'react';
 import {useNavigate} from 'react-router-dom';
-import {HeaderContainer, NavigationHeader, BackButton, Title} from './styles';
+import TextInput, {TextInputProps} from 'components/TextInput';
+import {HeaderContainer, BackButton, Title, InputContainer} from './styles';
 
-interface Props {
+interface HeaderProps {
     title: string;
     showBackButton?: boolean;
+    searchInput?: TextInputProps;
 }
 
-const Header = ({title, showBackButton = true}: Props) => {
+const Header = ({title, showBackButton = true, searchInput}: HeaderProps) => {
     const navigate = useNavigate();
     return (
         <HeaderContainer>
-            <NavigationHeader>
-                {showBackButton && (
-                    <BackButton
-                        onClick={() => {
-                            navigate(-1);
-                        }}
-                    >
-                        🔙
-                    </BackButton>
-                )}
-                <Title>{title}</Title>
-            </NavigationHeader>
+            {showBackButton && (
+                <BackButton
+                    onClick={() => {
+                        navigate(-1);
+                    }}
+                >
+                    <img src="/chevron-left.svg" alt="backButton" />
+                </BackButton>
+            )}
+            <Title>{title}</Title>
+            {searchInput && (
+                <InputContainer>
+                    <TextInput value={searchInput.value} onChange={searchInput.onChange} />
+                </InputContainer>
+            )}
         </HeaderContainer>
     );
 };

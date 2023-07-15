@@ -1,29 +1,32 @@
-import * as React from 'react';
-import {ListItem} from 'types';
+import React from 'react';
+
+import {ICardItem} from 'types';
+
 import Card from '../Card';
 import {Spinner} from '../Spinner';
+
 import {Container} from './styles';
 
-interface Props {
-    items?: ListItem[];
-    hasNavigation?: boolean;
-    isLoading: string;
+interface ListProps {
+    items: ICardItem[];
+    isLoading: boolean;
 }
 
-const List = ({items, hasNavigation = true, isLoading}: Props) => {
+const List = ({items, isLoading}: ListProps) => {
     return (
         <Container>
             {isLoading && <Spinner />}
             {!isLoading &&
-                items.map(({url, id, columns, navigationProps}, index) => {
+                items.map(({id, title, name, location, navigateTo, navigationProps}, index) => {
                     return (
                         <Card
                             key={`${id}-${index}`}
                             id={id}
-                            columns={columns}
+                            name={name}
+                            title={title}
+                            location={location}
+                            navigateTo={navigateTo}
                             navigationProps={navigationProps}
-                            hasNavigation={hasNavigation}
-                            url={url}
                         />
                     );
                 })}

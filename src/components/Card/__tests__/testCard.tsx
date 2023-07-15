@@ -1,6 +1,5 @@
 import React from 'react';
 import {fireEvent, render, screen} from '@testing-library/react';
-import {Teams} from 'types';
 import Card from '..';
 
 const mockUseNavigate = jest.fn();
@@ -11,55 +10,54 @@ jest.mock('react-router-dom', () => ({
 }));
 
 describe('Card', () => {
-    it('should render card with single column', () => {
-        var columns = [{key: 'columnKey', value: 'columnValue'}];
-        render(<Card columns={columns} />);
+    it('should render card with Title and Name', () => {
+        render(<Card id="card-test-id" title="Title Test" name="Name Test" />);
 
-        expect(screen.getByText('columnKey')).toBeInTheDocument();
-        expect(screen.getByText('columnValue')).toBeInTheDocument();
+        expect(screen.getByTestId('cardContainer-card-test-id')).toBeInTheDocument();
+        expect(screen.getByText('Title Test')).toBeInTheDocument();
+        expect(screen.getByText('Name Test')).toBeInTheDocument();
     });
 
-    it('should render card with multiple columns', () => {
-        var columns = [
-            {key: 'columnKey1', value: 'columnValue1'},
-            {key: 'columnKey2', value: 'columnValue2'},
-            {key: 'columnKey3', value: 'columnValue3'},
-            {key: 'columnKey4', value: ''},
-        ];
-        render(<Card columns={columns} />);
+    it('should render card with Title, Name and Location (all texts possible)', () => {
+        render(
+            <Card id="card-test-id" title="Title Test" name="Name Test" location="Location Test" />
+        );
 
-        expect(screen.getByText('columnKey1')).toBeInTheDocument();
-        expect(screen.getByText('columnValue1')).toBeInTheDocument();
-        expect(screen.getByText('columnKey2')).toBeInTheDocument();
-        expect(screen.getByText('columnValue2')).toBeInTheDocument();
-        expect(screen.getByText('columnKey3')).toBeInTheDocument();
-        expect(screen.getByText('columnValue3')).toBeInTheDocument();
-        expect(screen.getByText('columnKey4')).toBeInTheDocument();
+        expect(screen.getByTestId('cardContainer-card-test-id')).toBeInTheDocument();
+
+        expect(screen.getByTestId('cardTitle')).toBeInTheDocument();
+        expect(screen.getByText('Title Test')).toBeInTheDocument();
+
+        expect(screen.getByTestId('cardName')).toBeInTheDocument();
+        expect(screen.getByText('Name Test')).toBeInTheDocument();
+
+        expect(screen.getByTestId('cardLocation')).toBeInTheDocument();
+        expect(screen.getByText('📍Location Test')).toBeInTheDocument();
     });
 
-    it('should navigate when card is clicked and navigation is enabled', () => {
-        const navProps = {
-            id: '1',
-            name: 'Team 1',
-        } as Teams;
+    it('should navigate when card is clicked and has a navigation link (navigationTo)', () => {
+        render(<Card id="card-test-id" title="Title Test" name="Name Test" navigateTo="path" />);
+
+        fireEvent.click(screen.getByTestId('cardContainer-card-test-id'));
+
+        expect(mockUseNavigate).toHaveBeenCalledWith('path', {state: undefined});
+    });
+
+    it('should navigate (with state data) when card is clicked and has a navigation link (navigationTo)', () => {
+        const navProps = {id: '1', name: 'Test'};
+
         render(
             <Card
-                columns={[{key: 'columnKey', value: 'columnValue'}]}
-                url="path"
+                id="card-test-id"
+                title="Title Test"
+                name="Name Test"
+                navigateTo="path"
                 navigationProps={navProps}
             />
         );
 
-        fireEvent.click(screen.getByText('columnKey'));
+        fireEvent.click(screen.getByTestId('cardContainer-card-test-id'));
 
         expect(mockUseNavigate).toHaveBeenCalledWith('path', {state: navProps});
-    });
-
-    it('should not navigate when card is clicked and navigation is disabled', () => {
-        render(<Card columns={[{key: 'columnKey', value: 'columnValue'}]} hasNavigation={false} />);
-
-        fireEvent.click(screen.getByText('columnKey'));
-
-        expect(mockUseNavigate).not.toHaveBeenCalled();
     });
 });
