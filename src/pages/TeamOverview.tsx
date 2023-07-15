@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {useLocation, useParams} from 'react-router-dom';
 import {ITeamOverview, IUserData} from 'types';
+import {toast} from 'react-toastify';
 
 import useSWR from 'swr';
 import {getData, getUserData} from '../api';
@@ -19,12 +20,36 @@ const TeamOverview = () => {
     const [searchTeam, setSearchTeam] = useState('');
     const [usersFiltered, setUsersFiltered] = useState<IUserData[]>();
 
-    const {data: teamOverview} = useSWR<ITeamOverview>(`teams/${teamId}`, getData);
-    const {data: teamLead} = useSWR<IUserData>(() => `users/${teamOverview.teamLeadId}`, getData);
-    const {data: teamMembers} = useSWR(
+    const {data: teamOverview, error: teamError} = useSWR<ITeamOverview>(
+        `teams/${teamId}`,
+        getData
+    );
+    const {data: teamLead, error: leadError} = useSWR<IUserData>(
+        () => `users/${teamOverview.teamLeadId}`,
+        getData
+    );
+    const {data: teamMembers, error: membersError} = useSWR(
         () => teamOverview.teamMemberIds,
         async ids => Promise.all(ids.map(id => getUserData(id)))
     );
+
+    useEffect(() => {
+        const hasError = !!teamError || !!leadError || !!membersError;
+        const hasNullResponse = teamOverview === null || teamLead === null || teamMembers === null;
+
+        if (hasError || hasNullResponse) {
+            toast.error('Something went wrong, try again!', {
+                position: 'top-right',
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: 'light',
+            });
+        }
+    }, [teamError, leadError, membersError, teamOverview, teamLead, teamMembers]);
 
     useEffect(() => {
         if (teamMembers && teamMembers.length > 0) {
@@ -88,7 +113,7 @@ const TeamOverview = () => {
     return (
         <Container>
             <Header
-                title={`Team ${location.state.name}`}
+                title={`Team ${location.state.name ? location.state.name : ''}`}
                 searchInput={teamMembers && {value: searchTeam, onChange: handleUserSearch}}
             />
             {!isLoading && !usersFiltered && teamLead && teamLeadCard()}
